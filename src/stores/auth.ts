@@ -1,5 +1,8 @@
 import { defineStore } from 'pinia'
 import { apiLogin, apiMe, type MeResp } from '@/services/api/auth'
+import { resetDynamicRoutes } from '@/router/reset'
+import { router } from '@/router'
+import { usePermissionStore } from '@/stores/permission'
 
 const TOKEN_KEY = 'adminpro_token'
 
@@ -20,6 +23,13 @@ export const useAuthStore = defineStore('auth', {
       this.token = ''
       this.me = null
       localStorage.removeItem(TOKEN_KEY)
+    },
+    logout() {
+      const perm = usePermissionStore()
+      this.clearAuth()
+      perm.reset()
+      resetDynamicRoutes(router)
+      router.replace('/login')
     },
     async login(username: string, password: string) {
       const res = await apiLogin({ username, password })
